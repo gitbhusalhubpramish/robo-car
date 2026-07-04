@@ -117,7 +117,8 @@ void loop() {
     left();
   } else if (r){
     right();
-  } else {
+  } 
+  if(b && !(l&&r)) {
     backward();
   }
 }
