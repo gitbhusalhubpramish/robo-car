@@ -108,15 +108,16 @@ void loop() {
   b = false;
   r = false;
   l = false;
+  
+  server.handleClient();
 
   if (l && r){
     forward();
   } else if (l){
     left();
   } else if (r){
-    right()
+    right();
   } else {
-    backward()
+    backward();
   }
-  server.handleClient();
 }
