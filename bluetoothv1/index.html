@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESP32 BLE Robot</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#222;
+    color:white;
+    text-align:center;
+    margin-top:40px;
+}
+
+button{
+    width:120px;
+    height:60px;
+    font-size:18px;
+    margin:8px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+#connect{
+    background:#28a745;
+    color:white;
+}
+
+.direction{
+    background:#007bff;
+    color:white;
+}
+
+#status{
+    margin:20px;
+    font-size:18px;
+}
+</style>
+</head>
+<body>
+
+<h1>ESP32 BLE Robot</h1>
+
+<button id="connect" onclick="connectBLE()">Connect</button>
+
+<div id="status">Disconnected</div>
+
+<div>
+    <button class="direction"
+        onmousedown="send('F')"
+        onmouseup="send('S')"
+        ontouchstart="send('F')"
+        ontouchend="send('S')">
+        Forward
+    </button>
+</div>
+
+<div>
+    <button class="direction"
+        onmousedown="send('L')"
+        onmouseup="send('S')"
+        ontouchstart="send('L')"
+        ontouchend="send('S')">
+        Left
+    </button>
+
+    <button class="direction"
+        onmousedown="send('S')"
+        onclick="send('S')">
+        Stop
+    </button>
+
+    <button class="direction"
+        onmousedown="send('R')"
+        onmouseup="send('S')"
+        ontouchstart="send('R')"
+        ontouchend="send('S')">
+        Right
+    </button>
+</div>
+
+<div>
+    <button class="direction"
+        onmousedown="send('B')"
+        onmouseup="send('S')"
+        ontouchstart="send('B')"
+        ontouchend="send('S')">
+        Backward
+    </button>
+</div>
+
+<script>
+const SERVICE_UUID = "12345678-1234-1234-1234-123456789abc";
+const CHARACTERISTIC_UUID = "87654321-4321-4321-4321-cba987654321";
+
+let characteristic = null;
+
+async function connectBLE() {
+    try {
+        const device = await navigator.bluetooth.requestDevice({
+            filters: [
+                { services: [SERVICE_UUID] }
+            ]
+        });
+
+        const server = await device.gatt.connect();
+
+        const service = await server.getPrimaryService(SERVICE_UUID);
+
+        characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+
+        document.getElementById("status").innerHTML =
+            "Connected to " + device.name;
+
+        console.log("Connected");
+    }
+    catch(err){
+        console.error(err);
+        alert(err);
+    }
+}
+
+async function send(cmd){
+    if(!characteristic){
+        alert("Connect first!");
+        return;
+    }
+
+    try{
+        await characteristic.writeValue(
+            new TextEncoder().encode(cmd)
+        );
+        console.log("Sent:", cmd);
+    }
+    catch(err){
+        console.error(err);
+    }
+}
+</script>
+
+</body>
+</html>
